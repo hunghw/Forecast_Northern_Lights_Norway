@@ -1,29 +1,38 @@
 import argparse
 import urllib.request
 import re
-
 from html.parser import HTMLParser
+import requests
 
-parser = argparse.ArgumentParser(description="calculate X to the power of Y")
-parser = argparse.ArgumentParser()
-parser.add_argument("-l", "--location", action="store", dest="location", help="Set forecast location")
-parser.add_argument("-e", "--email", action="store", dest="email", help="address")
-#parser.parse_args()
+import datetime
+from time import sleep
 
-print(parser.parse_args().email)
+# define
 WAIT= ["1", "4", "7"]
 TRY= ["5", "6", "8", "9"]
 GO= ["2", "3"]
 
+# parse arguments
+parser = argparse.ArgumentParser(description="calculate X to the power of Y")
+parser = argparse.ArgumentParser()
+parser.add_argument("-l", "--location", action="store", dest="location", help="Set forecast location")
+location= parser.parse_args().location
+url = 'http://norway-lights.com/'+location+'/'
 
-url = 'http://norway-lights.com/'+parser.parse_args().location+'/'
-fp = urllib.request.urlopen(url)
-mybytes = fp.read()
 
-mystr = mybytes.decode("utf8")
-fp.close()
-#print(mystr)
 
+#notify
+def notification(message):
+    report = {"value1": location, "value2": message, "value3": url}
+    print(requests.post("https://maker.ifttt.com/trigger/forecast_result/with/key/clihE0CsNV7v92HFy0awnMSfmZYYmTaBAaJmNeWNeIn", data=report))
+
+
+def get_forecast():
+    fp = urllib.request.urlopen(url)
+    mybytes = fp.read()
+    mystr = mybytes.decode("utf8")
+    fp.close()
+    return mystr
 
 class MyHTMLParser(HTMLParser):
     attrs_figure= ""
@@ -34,25 +43,24 @@ class MyHTMLParser(HTMLParser):
     def get_attrs(self):
         return self.attrs_figure
 
-parser = MyHTMLParser()
-parser.feed(mystr)
-forecast_text= parser.get_attrs()[0][1]
+def send_notify():
+    parser = MyHTMLParser()
+    parser.feed(get_forecast())
+    forecast_text= parser.get_attrs()[0][1]
 
-print(forecast_text[18])
-if forecast_text[18] in GO:
-    print("Go")
-elif forecast_text[18] in TRY:
-    print("Try")
-else:
-    print("Wait")
-
-"""
-with urllib.request.urlopen() as response:
-    html = response.read()
-    #print(html)
-    print(type(html))
-    m= re.match(r"<figure class=\"forecast forecast-([1-9])\">", html+"")
-    #m= re.search(r"forecast-([1-9])", 'sfsdfssdf forecast-7 sddsfdsf')
-    
-    print(m.group(1))
-"""
+    print(forecast_text[18])
+    if forecast_text[18] in GO:
+        print("GO")
+        notification("GO")
+    elif forecast_text[18] in TRY:
+        print("TRY")
+        notification("TRY")
+    else:
+        print("WAIT")
+        notification("WAIT")
+while datetime.datetime.now().time().minute!=10:
+    sleep(60)
+while 1:
+    if datetime.datetime.now().time().hour <= 7:
+        send_notify()
+    sleep(3600)
