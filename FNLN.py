@@ -44,6 +44,7 @@ class MyHTMLParser(HTMLParser):
         return self.attrs_figure
 
 def send_notify():
+    print(datetime.datetime.now().time())
     parser = MyHTMLParser()
     parser.feed(get_forecast())
     forecast_text= parser.get_attrs()[0][1]
@@ -57,8 +58,8 @@ def send_notify():
         notification("TRY")
     else:
         print("WAIT")
-        notification("WAIT")
-while datetime.datetime.now().time().minute!=10:
+        #notification("WAIT")
+while datetime.datetime.now().time().minute!=0:
     sleep(60)
 while 1:
     if datetime.datetime.now().time().hour <= 7:
