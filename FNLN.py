@@ -25,19 +25,29 @@ location = parser.parse_args().location
 if location is None:
     print("please input place")
     exit(1)
-url = 'http://norway-lights.com/' + location + '/'
+
+headers = {
+    'User-Agent':
+    'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'
+}
+url = 'http://www.norway-lights.com/' + location + '/'
+req = urllib.request.Request(url=url, headers=headers)
 
 
 #notify
 def notification(message):
     report = {"value1": location, "value2": message, "value3": url}
-    print(requests.post(
-        "https://maker.ifttt.com/trigger/forecast_result/with/key/clihE0CsNV7v92HFy0awnMSfmZYYmTaBAaJmNeWNeIn",
-        data=report))
+    print(
+        requests.post(
+            "https://maker.ifttt.com/trigger/forecast_result/with/key/clihE0CsNV7v92HFy0awnMSfmZYYmTaBAaJmNeWNeIn",
+            data=report))
 
 
 def get_forecast():
-    fp = urllib.request.urlopen(url)
+
+    fp = urllib.request.urlopen(req)
+    # print(datetime.datetime.now().time())
+    # print(fp)
     mybytes = fp.read()
     mystr = mybytes.decode("utf8")
     fp.close()
@@ -73,9 +83,9 @@ def send_notify():
         #notification("WAIT")
 
 
-while datetime.datetime.now().time().minute != 0:
-    sleep(60)
+# while datetime.datetime.now().time().minute != 0:
+#     sleep(60)
 while 1:
-    if datetime.datetime.now().time().hour <= 7:
-        send_notify()
-    sleep(3600)
+    # if datetime.datetime.now().time().hour <= 7:
+    send_notify()
+    # sleep(3600)
