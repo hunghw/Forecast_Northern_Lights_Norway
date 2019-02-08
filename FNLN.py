@@ -39,7 +39,7 @@ def notification(message):
     report = {"value1": location, "value2": message, "value3": url}
     print(
         requests.post(
-            "https://maker.ifttt.com/trigger/forecast_result/with/key/clihE0CsNV7v92HFy0awnMSfmZYYmTaBAaJmNeWNeIn",
+            "https://maker.ifttt.com/trigger/[replace your own url]",
             data=report))
 
 
